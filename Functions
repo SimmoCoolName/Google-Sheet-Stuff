@@ -1,0 +1,42 @@
+# Google Sheets helper functions: 
+# To find first empty row
+
+def first_empty_row(worksheet):
+    alles = worksheet.get_all_values()
+    row_num = 0
+    consecutive = 0
+    for row in alles:
+        flag = False
+        for col in row:
+            if col != "":
+                flag = True
+                break
+        if flag:
+            consecutive = 0
+        else:
+            consecutive += 1
+        if consecutive == 2:
+            return row_num - 1
+        row_num += 1
+    return row_num
+
+# Append on that row
+def append_rows(worksheet, list_of_values):
+    col_count = len(list_of_values[0])
+    row_count = first_empty_row(worksheet)
+    start_cell = worksheet.get_addr_int(row_count + 1, 1)
+    end_cell = worksheet.get_addr_int(row_count + len(list_of_values), col_count)
+    rng = worksheet.range('%s:%s' % (start_cell, end_cell))
+    for cell in rng:
+        cell.value = list_of_values[cell._row - row_count - 1][cell._col - 1]
+    worksheet.update_cells(rng)
+
+
+# This is to handle the index search of the dates to remove
+# list.index(item) throws a huge error if the value is not present.
+def find_element_in_list(element, list_element):
+    try:
+        index_element = list_element.index(element)
+        return index_element
+    except ValueError:
+        return None
